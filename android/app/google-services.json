@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1080973905905",
+    "firebase_url": "https://meet-ff189.firebaseio.com",
+    "project_id": "meet-ff189",
+    "storage_bucket": "meet-ff189.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1080973905905:android:ac849bcf766f3be3ab7e50",
+        "android_client_info": {
+          "package_name": "com.app.meet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1080973905905-bj6pj2cmvsic7kpv43a88amlhcqfd6h4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPNqC1CwiTydQxQx-19lmAYi9rIk3Njek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1080973905905-bj6pj2cmvsic7kpv43a88amlhcqfd6h4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1080973905905-ejpqpiqn7dcij9esr3vivdab5eh7fkf6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.app.meet"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
