@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meet/core/extensions/navigations.dart';
 import 'package:meet/dependecy_injection.dart';
+import 'package:meet/features/create_event/presentation/pages/create_event.dart';
 import 'package:meet/features/login/presentation/bloc/login_bloc.dart';
 import 'package:meet/features/login/presentation/widgets/loader.dart';
 import 'package:meet/features/login/presentation/widgets/local_instance_for_login_bloc.dart';
@@ -27,42 +28,42 @@ class _LoginState extends State<Login> {
       key: _scaffoldKey,
       body: BlocProvider(
         create: (context) => GetLocalInstanceOfLoginBloc.loginBloc ??= sl<LoginBloc>(),
-        child: BlocBuilder<LoginBloc, LoginState>(
-          builder: (context, state) {
-            if (state is Authenticating) {
-              WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-                if (!Loader.isShowing()) {
-                  Loader.show();
-                }
-              });
-            } else if (state is AuthenticatedSuccessfully) {
-              WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-                if (Loader.isShowing()) {
-                  Loader.dismiss();
-                }
-                //TODO: Fix this
-                // pushAndRemoveUntil(const ConnectWithFriends());
-                showErrorSnack(
-                  context,
-                  message: "Success",
-                );
-              });
-            } else if (state is AuthenticationFailed) {
-              Future.delayed(const Duration(seconds: 1), () {
+        child: BlocConsumer<LoginBloc, LoginState>(
+            listener: (context, state) {
+              if (state is Authenticating) {
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+                  if (!Loader.isShowing()) {
+                    Loader.show();
+                  }
+                });
+              } else if (state is AuthenticatedSuccessfully) {
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
                   if (Loader.isShowing()) {
                     Loader.dismiss();
                   }
+                  //TODO: Fix this
+                  // pushAndRemoveUntil(const ConnectWithFriends());
                   showErrorSnack(
                     context,
-                    message: state.message,
+                    message: "Success",
                   );
+                  push(CreateEvent());
                 });
-              });
-            }
-            return buildCenter(context);
-          },
-        ),
+              } else if (state is AuthenticationFailed) {
+                Future.delayed(const Duration(seconds: 1), () {
+                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+                    if (Loader.isShowing()) {
+                      Loader.dismiss();
+                    }
+                    showErrorSnack(
+                      context,
+                      message: state.message,
+                    );
+                  });
+                });
+              }
+            },
+            builder: (context, state) => buildCenter(context)),
       ),
     );
   }

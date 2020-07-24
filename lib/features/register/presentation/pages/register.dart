@@ -25,8 +25,8 @@ class _RegisterUserState extends State<RegisterUser> {
         body: BlocProvider(
           create: (context) =>
               GetLocalInstanceOfRegisterBloc.registerBloc ??= sl<RegisterBloc>(),
-          child: BlocBuilder<RegisterBloc, RegisterState>(
-            builder: (context, state) {
+          child: BlocConsumer<RegisterBloc, RegisterState>(
+            listener: (context, state) {
               if (state is Registering) {
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
                   if (!Loader.isShowing()) {
@@ -58,8 +58,8 @@ class _RegisterUserState extends State<RegisterUser> {
                   });
                 });
               }
-              return buildCenter(context);
             },
+            builder: (context, state) => buildCenter(context),
           ),
         ));
   }

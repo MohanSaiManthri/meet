@@ -11,3 +11,13 @@ class AuthenticationException implements Exception {
   final String error;
   AuthenticationException(this.error);
 }
+
+class EventCreationException implements Exception {
+  final String error;
+  EventCreationException(this.error);
+}
+
+class EventFetchException implements Exception {
+  final String error;
+  EventFetchException(this.error);
+}

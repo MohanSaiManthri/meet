@@ -26,6 +26,22 @@ class AuthenticationFailure extends Failure {
   String get errorMessage => error;
 }
 
+class EventCreationFailure extends Failure {
+  final String error;
+
+  const EventCreationFailure({@required this.error});
+  @override
+  String get errorMessage => error;
+}
+
+class EventFetchFailure extends Failure {
+  final String error;
+
+  const EventFetchFailure({@required this.error});
+  @override
+  String get errorMessage => error;
+}
+
 class UnkownFailure extends Failure {}
 
 class SocketFailure extends Failure {}
