@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:image_stack/image_stack.dart';
+import 'package:intl/intl.dart';
 import 'package:meet/core/utils/constants.dart';
 import 'package:meet/features/events/data/models/event_model.dart';
 import 'package:meet/features/events/presentation/pages/event_details.dart';
@@ -184,39 +184,17 @@ class Skeleton extends StatelessWidget {
     }
   }
 
-  List<String> getImageList(EventModel model) {
-    final List<String> listOfStirng = [];
-    for (final participant in model.eventParticipants) {
-      listOfStirng.add(participant.userPhotoURL);
-    }
-    return listOfStirng;
-  }
-
   List<Widget> getStackImageWidget(BuildContext context) {
-    final imageList = getImageList(model[index]);
     return <Widget>[
-      // Dynamic Calculations  -> Will be fixed
-      Visibility(
-        visible: imageList.length > 1,
-        child: imageList.length > 2
-            ? const SizedBox(
-                width: 40,
-              )
-            : const SizedBox(
-                width: 20,
-              ),
-      ),
-      Tooltip(
-        message: 'People Attending',
-        child: ImageStack(
-          imageList: imageList,
-          totalCount: imageList.length,
-          imageBorderColor: Colors.grey[300], backgroundColor: Colors.grey[300],
-          extraCountTextStyle: Theme.of(context).textTheme.bodyText2,
-          imageRadius: 28, // Radius of each images
-          imageCount: 3, // Maximum number of images to be shown
-          imageBorderWidth: 3, // Border width around the images
-        ),
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(model[index].eventName, style: Theme.of(context).textTheme.subtitle2),
+          Text(
+              'on ${DateFormat.yMMMEd().format(DateTime.parse(model[index].eventDateTime))}',
+              style: Theme.of(context).textTheme.caption)
+        ],
       ),
       const Spacer(
         flex: 4,
@@ -264,10 +242,4 @@ class Skeleton extends StatelessWidget {
 
 const warningMsgAlreadyReg = "You have already registered to this event!";
 const warningMsgOrganizer = "You are the organizer for this event";
-const String imagePlaceHolder =
-    'https://images.unsplash.com/photo-1527442965590-ffcc54675537?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80';
 
-const String textPlaceHolder =
-    'Duis rhoncus dui venenatis consequat porttitor. Etiam aliquet congue consequat. In posuere, nunc sit amet laoreet blandit, urna sapien imperdiet lectus, et molestie sem tortor quis dui. Donec molestie nisi iaculis sodales mollis. Read more';
-const String profilePlaceHolder =
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80';

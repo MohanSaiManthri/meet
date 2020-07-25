@@ -48,7 +48,7 @@ class _EventDetailsState extends State<EventDetails> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: widget.isHeAttendingEvent && isHeAttends
             ? FloatingActionButton.extended(
-                onPressed: attendEvent, label: const Text('Attend this Event'))
+                onPressed: attendEvent , label: const Text('Attend this Event'))
             : null,
         appBar: AppBar(
           title: Text(

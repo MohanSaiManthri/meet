@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meet/core/extensions/navigations.dart';
 import 'package:meet/core/utils/constants.dart';
 import 'package:meet/dependecy_injection.dart';
+import 'package:meet/features/events/presentation/pages/child_network_wrapper.dart';
 import 'package:meet/features/events/presentation/pages/events_list.dart';
 import 'package:meet/features/login/presentation/bloc/login_bloc.dart';
 import 'package:meet/features/login/presentation/widgets/loader.dart';
@@ -70,7 +71,7 @@ class _LoginState extends State<Login> {
         }
         final SharedPreferences _sharedPrefs = sl<SharedPreferences>();
         _sharedPrefs.setBool(keyDoesUserLoggedIn, true);
-        pushAndRemoveUntil(const EventsList());
+        pushAndRemoveUntil(const ChildNetworkWrapper(child: EventsList()));
       });
     } else if (state is AuthenticationFailed) {
       Future.delayed(const Duration(seconds: 1), () {
@@ -112,8 +113,7 @@ class _LoginState extends State<Login> {
               submitCalled: () => letTheUserLogin(context),
             )),
 
-        buildButton(context,
-            isEnabled: true, callback: () => letTheUserLogin(context)),
+        buildButton(context, isEnabled: true, callback: () => letTheUserLogin(context)),
         footer(context)
       ],
     );

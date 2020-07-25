@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:meet/core/extensions/navigations.dart';
 import 'package:meet/core/utils/constants.dart';
 import 'package:meet/dependecy_injection.dart';
+import 'package:meet/features/events/presentation/pages/child_network_wrapper.dart';
 import 'package:meet/features/events/presentation/pages/events_list.dart';
 import 'package:meet/features/login/presentation/pages/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,7 +37,7 @@ void prepareForLaunch() {
   Future.delayed(const Duration(seconds: 2), () {
     final SharedPreferences _sharedPrefs = sl<SharedPreferences>();
     if (_sharedPrefs.getBool(keyDoesUserLoggedIn) ?? false) {
-      pushAndRemoveUntil(const EventsList());
+      pushAndRemoveUntil(const ChildNetworkWrapper(child:  EventsList()));
     } else {
       pushReplacement(Login());
     }
