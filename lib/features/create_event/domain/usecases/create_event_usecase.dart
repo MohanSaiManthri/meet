@@ -20,7 +20,8 @@ class CreateEventUsecase extends UseCase<bool, CreateEventParams> {
           eventDateTime: params.eventDateTime,
           eventParticipants: params.eventParticipants,
           eventOrganizerDetails: params.eventOrganizerDetails,
-          eventImage: params.eventImage));
+          eventImage: params.eventImage,
+          eventCreatedAt: params.eventCreatedAt));
 }
 
 class CreateEventParams extends Equatable {
@@ -31,6 +32,7 @@ class CreateEventParams extends Equatable {
   final dynamic eventParticipants;
   final String eventImage;
   final dynamic eventOrganizerDetails;
+  final String eventCreatedAt;
 
   const CreateEventParams(
       {@required this.eventId,
@@ -39,6 +41,7 @@ class CreateEventParams extends Equatable {
       @required this.eventDateTime,
       @required this.eventParticipants,
       @required this.eventOrganizerDetails,
+      @required this.eventCreatedAt,
       @required this.eventImage});
 
   @override
@@ -47,6 +50,7 @@ class CreateEventParams extends Equatable {
         eventDescription,
         eventDateTime,
         eventParticipants,
+        eventCreatedAt,
         eventImage,
         eventOrganizerDetails
       ];

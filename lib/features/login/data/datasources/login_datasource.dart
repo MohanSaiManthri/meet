@@ -31,7 +31,7 @@ class LoginRemoteDataSourceImpl extends LoginRemoteDataSource {
       final FirebaseUser _firebaseUser = (await _firebaseAuth.signInWithEmailAndPassword(
               email: email, password: password))
           .user;
-      fetchTheUserDetailsFromTheServer(_firebaseUser.uid);
+      await fetchTheUserDetailsFromTheServer(_firebaseUser.uid);
       return true;
     } on PlatformException catch (e) {
       throw AuthenticationException(getError(e, email));

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_offline/flutter_offline.dart';
 import 'package:meet/application.dart';
 import 'package:meet/boarding/splash.dart';
+import 'package:meet/core/extensions/navigations.dart';
 import 'package:meet/core/utils/constants.dart';
+import 'package:meet/core/utils/global_network.dart';
 import 'package:meet/core/utils/styles.dart';
 import 'package:meet/dependecy_injection.dart' as di;
+import 'package:meet/no_internet.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,8 +29,30 @@ class MyApp extends StatelessWidget {
           textTheme: materialDesignTypeScale,
           cursorColor: primaryColor),
       navigatorKey: navigatorKey,
-      home: const Material(
-        child: Splash(),
+      home: Material(
+        child: Scaffold(
+            body: OfflineBuilder(
+                connectivityBuilder: (
+                  BuildContext context,
+                  ConnectivityResult connectivity,
+                  Widget child,
+                ) {
+                  final bool connected = connectivity != ConnectivityResult.none;
+                  GLobalNetowrk.isShown ??= false;
+                  if (connected ?? false) {
+                    if (GLobalNetowrk.isShown) {
+                      pop();
+                    }
+                  } else {
+                    if (!connected) {
+                      if (!GLobalNetowrk.isShown) {
+                        push(NoInternet());
+                      }
+                    }
+                  }
+                  return const Splash();
+                },
+                child: const Splash())),
       ),
     );
   }

@@ -6,6 +6,7 @@ Center buildErrorWidget(BuildContext context, EventsBloc eventsBloc,
     {String error = somethingWentWrong}) {
   return Center(
     child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Padding(
@@ -13,6 +14,7 @@ Center buildErrorWidget(BuildContext context, EventsBloc eventsBloc,
           child: Text(
             error,
             style: Theme.of(context).textTheme.bodyText2,
+            textAlign: TextAlign.center,
           ),
         ),
         RaisedButton(

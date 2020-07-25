@@ -19,13 +19,15 @@ class CreateEventBloc extends Bloc<CreateEventEvent, CreateEventState> {
     if (event is CreateEventAndStoreItToFirestore) {
       yield CreatingEvent();
       final _failedOrCreated = await createEventUsecase.call(CreateEventParams(
-          eventId: event.createEventEntity.eventID,
-          eventName: event.createEventEntity.eventName,
-          eventDescription: event.createEventEntity.eventDescription,
-          eventDateTime: event.createEventEntity.eventDateTime,
-          eventParticipants: event.createEventEntity.eventParticipants,
-          eventOrganizerDetails: event.createEventEntity.eventOrganizerDetails,
-          eventImage: event.createEventEntity.eventImage));
+        eventId: event.createEventEntity.eventID,
+        eventName: event.createEventEntity.eventName,
+        eventDescription: event.createEventEntity.eventDescription,
+        eventDateTime: event.createEventEntity.eventDateTime,
+        eventParticipants: event.createEventEntity.eventParticipants,
+        eventOrganizerDetails: event.createEventEntity.eventOrganizerDetails,
+        eventCreatedAt: event.createEventEntity.eventCreatedAt,
+        eventImage: event.createEventEntity.eventImage,
+      ));
       yield* _eitherLoadedOrErrorState(_failedOrCreated);
     }
   }

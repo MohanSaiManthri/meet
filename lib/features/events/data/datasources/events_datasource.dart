@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meet/core/error/exceptions.dart';
 import 'package:meet/features/events/data/models/event_model.dart';
@@ -24,7 +22,7 @@ class EventDatasourceImpl extends EventsDataSource {
         await Firestore.instance.collection(eventCollectionName).getDocuments();
     for (final DocumentSnapshot document in querySnapshot.documents) {
       try {
-        final event = EventModel.fromJson(HashMap.from(document.data));
+        final event = EventModel.fromJson(document.data);
         listOfEvents.add(event);
       } catch (e) {
         throw EventFetchException(e.toString());

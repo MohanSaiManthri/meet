@@ -11,9 +11,11 @@ class CreateEventEntity extends Equatable {
   final dynamic eventParticipants;
   final String eventImage;
   final dynamic eventOrganizerDetails;
+  final String eventCreatedAt;
 
   const CreateEventEntity(
-      {@required this.eventID,
+      {@required this.eventCreatedAt,
+      @required this.eventID,
       @required this.eventName,
       @required this.eventDescription,
       @required this.eventDateTime,
@@ -28,7 +30,8 @@ class CreateEventEntity extends Equatable {
         eventDescription,
         eventDateTime,
         eventParticipants,
-        eventImage
+        eventImage,
+        eventCreatedAt
       ];
 
   HashMap<String, dynamic> toJson() => HashMap.of({
@@ -38,18 +41,19 @@ class CreateEventEntity extends Equatable {
         keyEventDateTime: eventDateTime,
         keyEventOrganizerDetails: eventOrganizerDetails,
         keyEventImage: eventImage,
+        keyEventCreatedAt: eventCreatedAt,
         keyEventParticipants: eventParticipants,
       });
 
   CreateEventEntity fromJson(HashMap<String, dynamic> rawData) => CreateEventEntity(
-        eventID: rawData[keyEventID].toString(),
-        eventName: rawData[keyEventName].toString(),
-        eventDescription: rawData[keyEventDescription].toString(),
-        eventDateTime: rawData[keyEventDateTime].toString(),
-        eventOrganizerDetails: rawData[keyEventOrganizerDetails],
-        eventImage: rawData[keyEventImage].toString(),
-        eventParticipants: rawData[keyEventParticipants],
-      );
+      eventID: rawData[keyEventID].toString(),
+      eventName: rawData[keyEventName].toString(),
+      eventDescription: rawData[keyEventDescription].toString(),
+      eventDateTime: rawData[keyEventDateTime].toString(),
+      eventOrganizerDetails: rawData[keyEventOrganizerDetails],
+      eventImage: rawData[keyEventImage].toString(),
+      eventParticipants: rawData[keyEventParticipants],
+      eventCreatedAt: rawData[keyEventCreatedAt].toString());
 }
 
 const String keyEventID = 'event_id';
@@ -59,4 +63,5 @@ const String keyEventDateTime = 'event_date_time';
 const String keyEventParticipants = 'event_participants';
 const String keyEventOrganizerDetails = 'evnt_organizer_details';
 const String keyEventOrganizerUID = 'event_organzier_uid';
+const String keyEventCreatedAt = 'event_created_at';
 const String keyEventImage = 'event_image';

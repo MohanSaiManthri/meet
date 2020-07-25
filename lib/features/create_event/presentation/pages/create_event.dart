@@ -1,14 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meet/core/extensions/navigations.dart';
 import 'package:meet/core/utils/constants.dart';
+import 'package:meet/core/utils/general_dialog.dart';
 import 'package:meet/dependecy_injection.dart';
 import 'package:meet/features/create_event/domain/entities/create_event_entity.dart';
 import 'package:meet/features/create_event/presentation/bloc/create_event_bloc.dart';
+import 'package:meet/features/create_event/presentation/widgets/create_event.dart';
 import 'package:meet/features/create_event/presentation/widgets/loader.dart';
-import 'package:meet/features/events/presentation/pages/events_list.dart';
+import 'package:meet/features/create_event/presentation/widgets/text_fields.dart';
 import 'package:meet/features/register/data/models/user_model.dart';
 import 'package:random_string/random_string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,14 +26,6 @@ class CreateEvent extends StatefulWidget {
 }
 
 class _CreateEventState extends State<CreateEvent> {
-  final CreateEventBloc createEventBloc = sl<CreateEventBloc>();
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  final SharedPreferences _sharedPreferences = sl<SharedPreferences>();
-
-  UserModel userModel;
-
   @override
   void initState() {
     super.initState();
@@ -47,47 +44,133 @@ class _CreateEventState extends State<CreateEvent> {
         child: BlocConsumer<CreateEventBloc, CreateEventState>(
           listener: (context, state) => buildHelper(context, state),
           builder: (context, state) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  RaisedButton(
-                    // TODO: Start from here
-                    // First generate randomID as an eventID
-                    // Make the fields dynamic
-                    // Thats it in create event
-                    // Then after go to event list and do further steps.
-                    onPressed: () => createEventBloc.add(CreateEventAndStoreItToFirestore(
-                        createEventEntity: CreateEventEntity(
-                      eventID: randomAlphaNumeric(10),
-                      eventName: 'First Event',
-                      eventDescription:
-                          'During a flex layout, available space along the main axis is allocated to children. After allocating space, there might be some remaining free space. This value controls whether to maximize or minimize the amount of free space, subject to the incoming layout constraints.',
-                      eventDateTime: '31/07/2020',
-                      eventOrganizerDetails: userModel.toJson(),
-                      eventImage:
-                          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80',
-                      eventParticipants: const [<String, dynamic>{}],
-                    ))),
-                    child: Text(
-                      'Create Event'.toUpperCase(),
-                      style: Theme.of(context).textTheme.button,
-                    ),
-                  ),
-                  RaisedButton(
-                    onPressed: () => push(const EventsList()),
-                    child: Text(
-                      'List Events'.toUpperCase(),
-                      style: Theme.of(context).textTheme.button,
-                    ),
-                  ),
-                ],
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  'Create Event',
+                  style: Theme.of(context).textTheme.headline6.apply(color: Colors.white),
+                ),
               ),
+              body: buildForm(context),
             );
           },
         ),
       ),
     );
+  }
+
+  Form buildForm(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: ListView(
+        children: <Widget>[
+          buildSizedBox(),
+          buildImagePlaceholder(context),
+          GetFields(
+            nameController: _nameController,
+            dateController: _dateController,
+            descriptionController: _descriptionController,
+            submitCalled: _createEvent,
+          ),
+          buildButton(context, isEnabled: true, callback: _createEvent),
+        ],
+      ),
+    );
+  }
+
+  void _createEvent() {
+    if (_formKey.currentState.validate()) {
+      createEventBloc.add(CreateEventAndStoreItToFirestore(
+          createEventEntity: CreateEventEntity(
+        eventID: randomAlphaNumeric(10),
+        eventName: _nameController.text.trim(),
+        eventDescription: _descriptionController.text.trim(),
+        eventDateTime: _dateController.text.trim(),
+        eventOrganizerDetails: userModel.toJson(),
+        eventCreatedAt: DateTime.now().toIso8601String(),
+        eventImage: path,
+        eventParticipants: const [<String, dynamic>{}],
+      )));
+    }
+  }
+
+  Widget buildImagePlaceholder(BuildContext context) {
+    return Center(
+      child: Container(
+        height: deviceHeight * 0.3,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: path == null ? Colors.grey[200] : null),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => buildShowCupertinoModalPopup(context),
+            child: Container(
+              width: deviceWidth * 0.9,
+              height: deviceHeight * 0.3,
+              child: path == null
+                  ? Icon(
+                      Icons.add_photo_alternate,
+                      size: 36,
+                      color: Colors.grey,
+                    )
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        File(path),
+                        fit: BoxFit.cover,
+                      )),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> buildShowCupertinoModalPopup(BuildContext context) async {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+              onPressed: () async {
+                pop();
+                try {
+                  path = (await imagePicker.getImage(source: ImageSource.camera)).path;
+                  if (mounted) {
+                    setState(() {});
+                  }
+                } catch (_) {}
+              },
+              child: const Text("Open Camera")),
+          CupertinoActionSheetAction(
+              onPressed: () async {
+                pop();
+                try {
+                  path = (await imagePicker.getImage(source: ImageSource.gallery)).path;
+                  if (mounted) {
+                    setState(() {});
+                  }
+                } catch (_) {}
+              },
+              child: const Text("Open Gallery")),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+            isDefaultAction: true, onPressed: () => pop(), child: const Text('Cancel')),
+      ),
+    );
+  }
+
+  void showErrorSnack(BuildContext context, {String message}) {
+    try {
+      final snackbar = SnackBar(
+          content: Text(
+        message,
+        style: Theme.of(context).textTheme.bodyText2.apply(color: Colors.white),
+      ));
+      _scaffoldKey.currentState.showSnackBar(snackbar);
+    } catch (_) {}
   }
 
   void buildHelper(BuildContext context, CreateEventState state) {
@@ -102,10 +185,8 @@ class _CreateEventState extends State<CreateEvent> {
         if (Loader.isShowing()) {
           Loader.dismiss();
         }
-        showErrorSnack(
-          context,
-          message: "Success",
-        );
+        mShowGeneralDialog(context,
+            content: "Event Created Successfully", callback: () => pop());
       });
     } else if (state is FailedToCreateEvent) {
       Future.delayed(const Duration(seconds: 1), () {
@@ -122,12 +203,63 @@ class _CreateEventState extends State<CreateEvent> {
     }
   }
 
-  void showErrorSnack(BuildContext context, {String message}) {
-    final snackbar = SnackBar(
-        content: Text(
-      message,
-      style: Theme.of(context).textTheme.bodyText2.apply(color: Colors.white),
-    ));
-    _scaffoldKey.currentState.showSnackBar(snackbar);
+  SizedBox buildSizedBox() {
+    return const SizedBox(
+      height: 20,
+    );
   }
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+
+  final ImagePicker imagePicker = ImagePicker();
+
+  String path;
+  final CreateEventBloc createEventBloc = sl<CreateEventBloc>();
+
+  final SharedPreferences _sharedPreferences = sl<SharedPreferences>();
+
+  UserModel userModel;
 }
+
+// Center(
+//               child: Column(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: <Widget>[
+//                   RaisedButton(
+//                     // TODO: Start from here
+//                     // First generate randomID as an eventID
+//                     // Make the fields dynamic
+//                     // Thats it in create event
+//                     // Then after go to event list and do further steps.
+//                     onPressed: () => createEventBloc.add(CreateEventAndStoreItToFirestore(
+//                         createEventEntity: CreateEventEntity(
+//                       eventID: randomAlphaNumeric(10),
+//                       eventName: 'First Event',
+//                       eventDescription:
+//                           'During a flex layout, available space along the main axis is allocated to children. After allocating space, there might be some remaining free space. This value controls whether to maximize or minimize the amount of free space, subject to the incoming layout constraints.',
+//                       eventDateTime: '31/07/2020',
+//                       eventOrganizerDetails: userModel.toJson(),
+//                       eventImage:
+//                           'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80',
+//                       eventParticipants: const [<String, dynamic>{}],
+//                     ))),
+//                     child: Text(
+//                       'Create Event'.toUpperCase(),
+//                       style: Theme.of(context).textTheme.button,
+//                     ),
+//                   ),
+//                   RaisedButton(
+//                     onPressed: () => push(const EventsList()),
+//                     child: Text(
+//                       'List Events'.toUpperCase(),
+//                       style: Theme.of(context).textTheme.button,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             );

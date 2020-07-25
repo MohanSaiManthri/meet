@@ -46,19 +46,13 @@ class GetEventsUsecase extends UseCase<OrganizedEventModel, EventsParams> {
 
   List<EventModel> getOtherEvents(List<EventModel> listOfModel, UserModel mUserModel) {
     return listOfModel
-        .where((element) =>
-            UserModel.fromJson(element.eventOrganizerDetails as Map<String, dynamic>)
-                .userUID !=
-            mUserModel.userUID)
+        .where((element) => element.eventOrganizerDetails.userUID != mUserModel.userUID)
         .toList();
   }
 
   List<EventModel> getMyEvents(List<EventModel> listOfModel, UserModel mUserModel) {
     return listOfModel
-        .where((element) =>
-            UserModel.fromJson(element.eventOrganizerDetails as Map<String, dynamic>)
-                .userUID ==
-            mUserModel.userUID)
+        .where((element) => element.eventOrganizerDetails.userUID == mUserModel.userUID)
         .toList();
   }
 }

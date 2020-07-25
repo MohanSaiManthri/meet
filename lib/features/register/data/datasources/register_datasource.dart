@@ -84,16 +84,16 @@ class RegisterRemoteDataSourceImpl extends RegisterRemoteDataSource {
     try {
       await Firestore.instance.collection('users').document(user.uid).setData(hashMap);
       final String encodedData = json.encode(hashMap);
-      cacheDataForLaterUse(encodedData);
+      await cacheDataForLaterUse(encodedData);
     } catch (e) {
       await signoutUser();
       throw AuthenticationException(errorWhileFetchingDataFromFirestore);
     }
   }
 
-  void cacheDataForLaterUse(String encodedData) {
+  Future<void> cacheDataForLaterUse(String encodedData) async {
     final SharedPreferences sharedPreferences = sl<SharedPreferences>();
-    sharedPreferences.setString(keyUserInfo, encodedData);
+    await sharedPreferences.setString(keyUserInfo, encodedData);
   }
 
   /// Checks whether email is registered with us any way like `Google, Facebook` etc, As of now we only use `EMAIL`, but in future this will be more helpful.

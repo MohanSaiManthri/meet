@@ -1,7 +1,9 @@
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:meet/features/register/data/models/user_model.dart';
 
 class EventModel extends Equatable {
   final String eventID;
@@ -9,11 +11,13 @@ class EventModel extends Equatable {
   final String eventDescription;
   final String eventDateTime;
   final String eventImage;
-  final dynamic eventOrganizerDetails;
-  final dynamic eventParticipants;
+  final UserModel eventOrganizerDetails;
+  final List<UserModel> eventParticipants;
+  final String eventCreatedAt;
 
   const EventModel(
-      {@required this.eventID,
+      {@required this.eventCreatedAt,
+      @required this.eventID,
       @required this.eventName,
       @required this.eventDescription,
       @required this.eventDateTime,
@@ -28,7 +32,8 @@ class EventModel extends Equatable {
         eventDescription,
         eventDateTime,
         eventParticipants,
-        eventImage
+        eventImage,
+        eventCreatedAt
       ];
 
   HashMap<String, dynamic> toJson() => HashMap.of({
@@ -38,6 +43,7 @@ class EventModel extends Equatable {
         keyEventDateTime: eventDateTime,
         keyEventParticipants: eventParticipants,
         keyEventOrganizerDetails: eventOrganizerDetails,
+        keyEventCreatedAt: eventCreatedAt,
         keyEventImage: eventImage
       });
 
@@ -46,9 +52,27 @@ class EventModel extends Equatable {
       eventName: rawData[keyEventName].toString(),
       eventDescription: rawData[keyEventDescription].toString(),
       eventDateTime: rawData[keyEventDateTime].toString(),
-      eventParticipants: rawData[keyEventParticipants],
-      eventOrganizerDetails: rawData[keyEventOrganizerDetails],
-      eventImage: rawData[keyEventImage].toString());
+      eventParticipants: formatParticipants(rawData),
+      eventOrganizerDetails:
+          UserModel.fromJson(rawData[keyEventOrganizerDetails] as Map<String, dynamic>),
+      eventImage: rawData[keyEventImage].toString(),
+      eventCreatedAt: rawData[keyEventCreatedAt].toString());
+
+  static List<UserModel> formatParticipants(Map<String, dynamic> data) {
+    final List<UserModel> listOfParticipants = [];
+    final decodedData = json.decode(json.encode(data[keyEventParticipants]));
+    (decodedData as List<dynamic>)
+        .removeWhere((element) => (element as Map<String, dynamic>).isEmpty);
+    if ((decodedData.runtimeType.toString() == 'List<dynamic>') &&
+        (decodedData as List<dynamic>).isEmpty) {
+      return listOfParticipants;
+    }
+    final rawData = decodedData as List<dynamic>;
+    for (final participant in rawData) {
+      listOfParticipants.add(UserModel.fromJson(participant as Map<String, dynamic>));
+    }
+    return listOfParticipants;
+  }
 }
 
 const String keyEventID = 'event_id';
@@ -57,4 +81,5 @@ const String keyEventDescription = 'event_description';
 const String keyEventDateTime = 'event_date_time';
 const String keyEventParticipants = 'event_participants';
 const String keyEventOrganizerDetails = 'evnt_organizer_details';
+const String keyEventCreatedAt = 'event_created_at';
 const String keyEventImage = 'event_image';
