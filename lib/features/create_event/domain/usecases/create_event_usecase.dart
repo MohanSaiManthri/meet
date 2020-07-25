@@ -14,34 +14,40 @@ class CreateEventUsecase extends UseCase<bool, CreateEventParams> {
   @override
   Future<Either<Failure, bool>> call(CreateEventParams params) =>
       createEventRepository.letsCreateEventOnFirestore(CreateEventEntity(
+          eventID: params.eventId,
           eventName: params.eventName,
           eventDescription: params.eventDescription,
           eventDateTime: params.eventDateTime,
           eventParticipants: params.eventParticipants,
-          eventOrganizer: params.eventOrganizer,
-          eventOrganizerUID: params.eventOrganizerUID,
+          eventOrganizerDetails: params.eventOrganizerDetails,
           eventImage: params.eventImage));
 }
 
 class CreateEventParams extends Equatable {
+  final String eventId;
   final String eventName;
   final String eventDescription;
   final String eventDateTime;
-  final String eventParticipants;
+  final dynamic eventParticipants;
   final String eventImage;
-  final String eventOrganizer;
-  final String eventOrganizerUID;
+  final dynamic eventOrganizerDetails;
 
   const CreateEventParams(
-      {@required this.eventName,
+      {@required this.eventId,
+      @required this.eventName,
       @required this.eventDescription,
       @required this.eventDateTime,
       @required this.eventParticipants,
-      @required this.eventOrganizer,
-      @required this.eventOrganizerUID,
+      @required this.eventOrganizerDetails,
       @required this.eventImage});
 
   @override
-  List<Object> get props =>
-      [eventName, eventDescription, eventDateTime, eventParticipants, eventImage];
+  List<Object> get props => [
+        eventName,
+        eventDescription,
+        eventDateTime,
+        eventParticipants,
+        eventImage,
+        eventOrganizerDetails
+      ];
 }

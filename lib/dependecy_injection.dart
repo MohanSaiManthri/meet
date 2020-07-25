@@ -10,6 +10,7 @@ import 'package:meet/features/events/data/datasources/events_datasource.dart';
 import 'package:meet/features/events/data/repositories/event_repo_impl.dart';
 import 'package:meet/features/events/domain/repositories/events_repository.dart';
 import 'package:meet/features/events/domain/usecases/get_events_usecase.dart';
+import 'package:meet/features/events/domain/usecases/mark_event_usecase.dart';
 import 'package:meet/features/events/presentation/bloc/events_bloc.dart';
 import 'package:meet/features/login/data/datasources/login_datasource.dart';
 import 'package:meet/features/login/data/repositories/login_repo_impl.dart';
@@ -58,6 +59,8 @@ void registerUseCases() {
   sl.registerLazySingleton(() => CreateEventUsecase(createEventRepository: sl()));
   // ? EventsList Use Cases
   sl.registerLazySingleton(() => GetEventsUsecase(eventRepository: sl()));
+  // ? MarkEvent Use Cases
+  sl.registerLazySingleton(() => MarkEventUseCase(eventRepository: sl()));
 }
 
 void registerDataSource() {
@@ -116,6 +119,6 @@ void registerBlocs() {
     () => CreateEventBloc(createEventUsecase: sl()),
   );
   sl.registerFactory(
-    () => EventsBloc(getEventsUsecase: sl()),
+    () => EventsBloc(getEventsUsecase: sl(), markEventUseCase: sl()),
   );
 }

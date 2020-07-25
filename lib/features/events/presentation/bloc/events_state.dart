@@ -13,7 +13,7 @@ class EventsInitial extends EventsState {
 class FetchingEvents extends EventsState {}
 
 class EventsFetchedSuccessfully extends EventsState {
-  final List<EventModel> listOfEvents;
+  final OrganizedEventModel listOfEvents;
 
   EventsFetchedSuccessfully({this.listOfEvents});
 
@@ -28,4 +28,22 @@ class FailedToFetchEvents extends EventsState {
 
   @override
   List<Object> get props => [errorMsg];
+}
+
+class UpdatingUserEventstatus extends EventsState {}
+
+class UserNowAttendingEvent extends EventsState {
+  final bool unnecessaryBool;
+
+  UserNowAttendingEvent({this.unnecessaryBool});
+  @override
+  List<Object> get props => [unnecessaryBool];
+}
+
+class FailedToUpdateUserEventstatus extends EventsState {
+  final String error;
+
+  FailedToUpdateUserEventstatus({@required this.error});
+  @override
+  List<Object> get props => [error];
 }

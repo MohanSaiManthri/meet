@@ -21,3 +21,8 @@ class EventFetchException implements Exception {
   final String error;
   EventFetchException(this.error);
 }
+
+class MarkingUserToAttentEventException implements Exception {
+  final String error;
+  MarkingUserToAttentEventException(this.error);
+}

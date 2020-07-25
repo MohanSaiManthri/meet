@@ -11,3 +11,13 @@ class FetchAllEventsOrganizedOnFirestore extends EventsEvent {
   @override
   List<Object> get props => [];
 }
+
+class LetTheUserAttendEventAsRequested extends EventsEvent {
+  final String eventID;
+  final UserModel userModel;
+
+  const LetTheUserAttendEventAsRequested({this.eventID, this.userModel});
+
+  @override
+  List<Object> get props => [eventID, userModel];
+}

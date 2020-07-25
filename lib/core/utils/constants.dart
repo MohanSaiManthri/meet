@@ -13,3 +13,4 @@ double deviceHeight =
 // Constant Strings
 const String keyLoggedInUser = "KEY_LOGGED_IN_USER";
 const String keyUserInfo = "KEY_USER_INFO";
+const String keyDoesUserLoggedIn = "DOES_USER_LOGGED_IN";

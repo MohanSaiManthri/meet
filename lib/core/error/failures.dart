@@ -42,6 +42,14 @@ class EventFetchFailure extends Failure {
   String get errorMessage => error;
 }
 
+class MarkingUserToAttentEventFailure extends Failure {
+  final String error;
+
+  const MarkingUserToAttentEventFailure({@required this.error});
+  @override
+  String get errorMessage => error;
+}
+
 class UnkownFailure extends Failure {}
 
 class SocketFailure extends Failure {}

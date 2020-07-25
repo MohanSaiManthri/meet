@@ -34,17 +34,26 @@ class LoginRemoteDataSourceImpl extends LoginRemoteDataSource {
       fetchTheUserDetailsFromTheServer(_firebaseUser.uid);
       return true;
     } on PlatformException catch (e) {
-      throw AuthenticationException(e.toString().contains('ERROR_USER_NOT_FOUND')
-          ? accountDoesNotExists(email)
-          : e.toString());
+      throw AuthenticationException(getError(e, email));
     } catch (e) {
       throw AuthenticationException(e.toString());
     }
   }
 
-  void cacheDataForLaterUse(String encodedData) {
+  String getError(PlatformException e, String email) {
+    return e.toString().contains('ERROR_TOO_MANY_REQUESTS')
+        ? tooManyRequests
+        : e.toString().contains('ERROR_USER_NOT_FOUND')
+            ? accountDoesNotExists(email)
+            : e.toString().contains('ERROR_WRONG_PASSWORD') ||
+                    e.toString().contains('ERROR_USER_NOT_FOUND')
+                ? invalidCredentials
+                : e.toString();
+  }
+
+  Future<void> cacheDataForLaterUse(String encodedData) async {
     final SharedPreferences sharedPreferences = sl<SharedPreferences>();
-    sharedPreferences.setString(keyLoggedInUser, encodedData);
+    await sharedPreferences.setString(keyUserInfo, encodedData);
   }
 
   Future<void> fetchTheUserDetailsFromTheServer(String uid) async {
@@ -52,7 +61,7 @@ class LoginRemoteDataSourceImpl extends LoginRemoteDataSource {
       final DocumentSnapshot documentSnapshot =
           await Firestore.instance.collection('users').document(uid).get();
       final String encodedData = json.encode(documentSnapshot.data);
-      cacheDataForLaterUse(encodedData);
+      await cacheDataForLaterUse(encodedData);
     } catch (e) {
       await signoutUser();
       throw AuthenticationException(errorWhileFetchingDataFromFirestore);
@@ -73,3 +82,7 @@ const String errorWhileFetchingDataFromFirestore =
     "We are facing difficulties contacting server, Please try again!";
 const String accountDoesNotExists =
     "Sorry, *username* is not recognized as an active email address";
+
+const String invalidCredentials = "Sorry, email/password entered is invalid!";
+const String tooManyRequests =
+    "Login unavailable because of too many Failed attempts, Try again in few hours ";

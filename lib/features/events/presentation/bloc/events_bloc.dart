@@ -4,14 +4,17 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:meet/core/error/failures.dart';
-import 'package:meet/features/events/data/models/event_model.dart';
 import 'package:meet/features/events/domain/usecases/get_events_usecase.dart';
+import 'package:meet/features/events/domain/usecases/mark_event_usecase.dart';
+import 'package:meet/features/register/data/models/user_model.dart';
 part 'events_event.dart';
 part 'events_state.dart';
 
 class EventsBloc extends Bloc<EventsEvent, EventsState> {
   final GetEventsUsecase getEventsUsecase;
-  EventsBloc({@required this.getEventsUsecase}) : super(EventsInitial());
+  final MarkEventUseCase markEventUseCase;
+  EventsBloc({@required this.getEventsUsecase, @required this.markEventUseCase})
+      : super(EventsInitial());
   @override
   Stream<EventsState> mapEventToState(
     EventsEvent event,
@@ -20,15 +23,29 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
       yield FetchingEvents();
       final _failedOrFetched = await getEventsUsecase.call(EventsParams());
       yield* _eitherLoadedOrErrorState(_failedOrFetched);
+    } else if (event is LetTheUserAttendEventAsRequested) {
+      yield UpdatingUserEventstatus();
+      final _failedOrUpdated = await markEventUseCase
+          .call(MarkEventParams(eventID: event.eventID, userModel: event.userModel));
+      yield* _eitherUpdatedOrErrorState(_failedOrUpdated);
     }
   }
 
   Stream<EventsState> _eitherLoadedOrErrorState(
-    Either<Failure, List<EventModel>> failureOrTrivia,
+    Either<Failure, OrganizedEventModel> failureOrTrivia,
   ) async* {
     yield failureOrTrivia.fold(
       (failure) => FailedToFetchEvents(errorMsg: _mapFailureToMessage(failure)),
-      (List<EventModel> trivia) => EventsFetchedSuccessfully(listOfEvents: trivia),
+      (OrganizedEventModel trivia) => EventsFetchedSuccessfully(listOfEvents: trivia),
+    );
+  }
+
+  Stream<EventsState> _eitherUpdatedOrErrorState(
+    Either<Failure, bool> failureOrTrivia,
+  ) async* {
+    yield failureOrTrivia.fold(
+      (failure) => FailedToUpdateUserEventstatus(error: _mapFailureToMessage(failure)),
+      (bool trivia) => UserNowAttendingEvent(unnecessaryBool: trivia),
     );
   }
 

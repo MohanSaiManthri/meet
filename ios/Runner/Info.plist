@@ -26,6 +26,12 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires to access Camera to allow user to capture and upload image from camera.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app does not required access to microphone.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires to access Photos to allow user to upload image.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
