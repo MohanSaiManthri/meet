@@ -1,8 +1,10 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:meet/core/error/exceptions.dart';
 import 'package:meet/core/utils/constants.dart';
 import 'package:meet/core/utils/global_firebase_auth_instance.dart';
@@ -58,11 +60,23 @@ class RegisterRemoteDataSourceImpl extends RegisterRemoteDataSource {
     final String providerID = user.providerId;
     final bool isEmailVerified = user.isEmailVerified;
 
+    // If image is null then we will upload the placeholder as shown
+    String newPath =
+        "https://www.k2infocom.com/images/testinomials/profile-placeholder.png";
+    // else if it is not null then we will upload the given picture to storage and get the download url and store that in the firestore.
+    if (photoURL != null && photoURL.isNotEmpty) {
+      final _image = File(photoURL);
+      final StorageReference storageReference =
+          FirebaseStorage().ref().child('profile_pictures/${_image.name}}');
+      final StorageUploadTask uploadTask = storageReference.putFile(_image);
+      await uploadTask.onComplete;
+      newPath = (await storageReference.getDownloadURL()).toString();
+    }
     final HashMap<String, dynamic> hashMap = HashMap.of({
       'display_name': displayName,
       'email': email,
       'dob': dob,
-      'photo_url': photoURL,
+      'photo_url': newPath,
       'user_uid': userUID,
       'provider_id': providerID,
       'is_email_verified': isEmailVerified
@@ -79,7 +93,7 @@ class RegisterRemoteDataSourceImpl extends RegisterRemoteDataSource {
 
   void cacheDataForLaterUse(String encodedData) {
     final SharedPreferences sharedPreferences = sl<SharedPreferences>();
-    sharedPreferences.setString(keyUserInfo, json.encode(encodedData));
+    sharedPreferences.setString(keyUserInfo, encodedData);
   }
 
   /// Checks whether email is registered with us any way like `Google, Facebook` etc, As of now we only use `EMAIL`, but in future this will be more helpful.
@@ -110,3 +124,9 @@ class RegisterRemoteDataSourceImpl extends RegisterRemoteDataSource {
 
 const String errorWhileFetchingDataFromFirestore =
     "We are facing difficulties contacting server, Please try again!";
+
+extension FileExtention on FileSystemEntity {
+  String get name {
+    return path?.split("/")?.last;
+  }
+}

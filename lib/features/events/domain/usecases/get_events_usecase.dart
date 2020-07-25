@@ -24,9 +24,10 @@ class GetEventsUsecase extends UseCase<OrganizedEventModel, EventsParams> {
         await eventRepository.fetchAllOrganizedEventsFromFirestore();
     // Used to get the user details
     final SharedPreferences _sharedPreferences = sl<SharedPreferences>();
+    final rawData = _sharedPreferences.getString(keyUserInfo);
+    final decodedData = json.decode(rawData);
     // Convert string to UserModel
-    final mUserModel = UserModel.fromJson(
-        json.decode(_sharedPreferences.getString(keyUserInfo)) as Map<String, dynamic>);
+    final mUserModel = UserModel.fromJson(decodedData as Map<String, dynamic>);
 
     //Extract the data
     Failure error;
@@ -45,11 +46,11 @@ class GetEventsUsecase extends UseCase<OrganizedEventModel, EventsParams> {
 
   List<EventModel> getOtherEvents(List<EventModel> listOfModel, UserModel mUserModel) {
     return listOfModel
-      .where((element) =>
-          UserModel.fromJson(element.eventOrganizerDetails as Map<String, dynamic>)
-              .userUID !=
-          mUserModel.userUID)
-      .toList();
+        .where((element) =>
+            UserModel.fromJson(element.eventOrganizerDetails as Map<String, dynamic>)
+                .userUID !=
+            mUserModel.userUID)
+        .toList();
   }
 
   List<EventModel> getMyEvents(List<EventModel> listOfModel, UserModel mUserModel) {

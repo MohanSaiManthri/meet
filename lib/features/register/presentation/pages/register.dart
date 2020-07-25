@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meet/core/extensions/navigations.dart';
@@ -9,6 +12,7 @@ import 'package:meet/features/register/presentation/bloc/register_bloc.dart';
 import 'package:meet/features/register/presentation/widgets/check_box.dart';
 import 'package:meet/features/register/presentation/widgets/footer.dart';
 import 'package:meet/features/register/presentation/widgets/signup_button.dart';
+import 'package:meet/features/register/presentation/widgets/state_helper.dart';
 import 'package:meet/features/register/presentation/widgets/text_decoration.dart';
 import 'package:meet/features/register/presentation/widgets/text_fields.dart';
 
@@ -32,15 +36,19 @@ class _RegisterUserState extends State<RegisterUser> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        key: _scaffoldKey,
-        body: BlocProvider(
-          create: (context) => registerBloc ??= sl<RegisterBloc>(),
-          child: BlocConsumer<RegisterBloc, RegisterState>(
-            listener: (context, state) {},
-            builder: (context, state) => buildForm(context),
-          ),
-        ));
+    return AnnotatedRegion(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+          key: _scaffoldKey,
+          body: BlocProvider(
+            create: (context) => registerBloc ??= sl<RegisterBloc>(),
+            child: BlocConsumer<RegisterBloc, RegisterState>(
+              listener: (context, state) =>
+                  stateHelper(state, context, _scaffoldKey.currentState),
+              builder: (context, state) => buildForm(context),
+            ),
+          )),
+    );
   }
 
   Form buildForm(BuildContext context) {
@@ -52,73 +60,7 @@ class _RegisterUserState extends State<RegisterUser> {
           getStarted(context),
           signupInfo(context),
           buildSizedBox(),
-          Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    Container(
-                      width: 120,
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: primaryColor,
-                        child: CircleAvatar(
-                            radius: 48,
-                            backgroundColor: Colors.white,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(50),
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 12.0),
-                                child: Image.asset('assets/profile_placeholder.png'),
-                              ),
-                            )),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: IconButton(
-                          icon: CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.grey[200],
-                            child: const Icon(Icons.add, color: primaryColor),
-                          ),
-                          onPressed: () {
-                            showCupertinoModalPopup(
-                              context: context,
-                              builder: (context) => CupertinoActionSheet(
-                                actions: <Widget>[
-                                  CupertinoActionSheetAction(
-                                      onPressed: () async {
-                                        pop();
-                                        path = (await imagePicker.getImage(
-                                                source: ImageSource.camera))
-                                            .path;
-                                      },
-                                      child: const Text("Open Camera")),
-                                  CupertinoActionSheetAction(
-                                      onPressed: () async {
-                                        pop();
-                                        path = (await imagePicker.getImage(
-                                                source: ImageSource.gallery))
-                                            .path;
-                                      },
-                                      child: const Text("Open Gallery")),
-                                ],
-                                cancelButton: CupertinoActionSheetAction(
-                                    isDefaultAction: true,
-                                    onPressed: () => pop(),
-                                    child: const Text('Cancel')),
-                              ),
-                            );
-                          }),
-                    )
-                  ],
-                ),
-              ],
-            ),
-          ),
+          buildImagePlaceholder(context),
           GetFields(
             nameController: _nameController,
             emailController: _emailController,
@@ -141,6 +83,91 @@ class _RegisterUserState extends State<RegisterUser> {
     );
   }
 
+  Widget buildImagePlaceholder(BuildContext context) {
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Container(
+                width: 120,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: primaryColor,
+                  child: CircleAvatar(
+                      radius: 48,
+                      backgroundColor: Colors.white,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: Padding(
+                          padding: EdgeInsets.only(top: path == null ? 12.0 : 0),
+                          child: path == null
+                              ? Image.asset('assets/profile_placeholder.png')
+                              : Image.file(
+                                  File(path),
+                                  fit: BoxFit.cover,
+                                  width: 100,
+                                  height: 100,
+                                ),
+                        ),
+                      )),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: IconButton(
+                    icon: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Colors.grey[200],
+                      child: const Icon(Icons.add, color: primaryColor),
+                    ),
+                    onPressed: () {
+                      buildShowCupertinoModalPopup(context);
+                    }),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> buildShowCupertinoModalPopup(BuildContext context) async {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+              onPressed: () async {
+                pop();
+                try {
+                  path = (await imagePicker.getImage(source: ImageSource.camera)).path;
+                  if (mounted) {
+                    setState(() {});
+                  }
+                } catch (_) {}
+              },
+              child: const Text("Open Camera")),
+          CupertinoActionSheetAction(
+              onPressed: () async {
+                pop();
+                try {
+                  path = (await imagePicker.getImage(source: ImageSource.gallery)).path;
+                  if (mounted) {
+                    setState(() {});
+                  }
+                } catch (_) {}
+              },
+              child: const Text("Open Gallery")),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+            isDefaultAction: true, onPressed: () => pop(), child: const Text('Cancel')),
+      ),
+    );
+  }
+
   void showErrorSnack(BuildContext context, {String message}) {
     try {
       final snackbar = SnackBar(
@@ -155,8 +182,12 @@ class _RegisterUserState extends State<RegisterUser> {
   void registerUser() {
     if (_formKey.currentState.validate()) {
       FocusScope.of(context).requestFocus(FocusNode());
-      // registerBloc.add(RequestFirebaseToHandleRegistration(_emailController.text.trim(),
-      //     _passwordController.text.trim(), _nameController.text.trim()));
+      registerBloc.add(RequestFirebaseToHandleRegistration(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+          dob: _dobController.text.trim(),
+          name: _nameController.text.trim(),
+          photoUrl: path));
     }
   }
 
@@ -191,24 +222,6 @@ class _RegisterUserState extends State<RegisterUser> {
   final ImagePicker imagePicker = ImagePicker();
 
   String path;
-
-  Center buildCenter(BuildContext context) {
-    return Center(
-      child: RaisedButton(
-        onPressed: () => registerBloc.add(const RequestFirebaseToHandleRegistration(
-            email: 'mohansaimanthri03@gmail.com',
-            password: 'Test@123',
-            dob: '09/07/97',
-            name: 'Mohan Sai Manthri',
-            photoUrl:
-                'https://pbs.twimg.com/profile_images/1051433515127070720/5OrVggZg.jpg')),
-        child: Text(
-          'Register'.toUpperCase(),
-          style: Theme.of(context).textTheme.button,
-        ),
-      ),
-    );
-  }
 }
 
 const String signupUsing = 'Sign up using email and password';

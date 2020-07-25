@@ -34,8 +34,6 @@ Widget centeredChild(BuildContext context) {
 
 void prepareForLaunch() {
   Future.delayed(const Duration(seconds: 2), () {
-    pushReplacement(Login());
-    return;
     final SharedPreferences _sharedPrefs = sl<SharedPreferences>();
     if (_sharedPrefs.getBool(keyDoesUserLoggedIn) ?? false) {
       pushAndRemoveUntil(const EventsList());
